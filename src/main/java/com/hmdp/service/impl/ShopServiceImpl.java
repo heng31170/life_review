@@ -1,5 +1,6 @@
 package com.hmdp.service.impl;
 
+import cn.hutool.cache.Cache;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
@@ -9,6 +10,7 @@ import com.hmdp.entity.Shop;
 import com.hmdp.mapper.ShopMapper;
 import com.hmdp.service.IShopService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hmdp.utils.CacheClient;
 import com.hmdp.utils.RedisData;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -34,19 +36,25 @@ import static com.hmdp.utils.RedisConstants.*;
 public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IShopService {
 
     @Resource
-    StringRedisTemplate stringRedisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private CacheClient cacheClient;
 
     // *
     @Override
     public Result queryById(Long id) {
         //缓存穿透
-        //Shop shop = queryWithPassThrough(id);
+/*        Shop shop = cacheClient
+                .queryWithPassThrough(CACHE_SHOP_KEY, id, Shop.class, this::getById, CACHE_SHOP_TTL, TimeUnit.MINUTES);*/
 
         //互斥锁解决缓存击穿
-//        Shop shop = queryWithMutex(id);
+        Shop shop = cacheClient
+                .queryWithMutex(CACHE_SHOP_KEY, id, Shop.class, this::getById, CACHE_SHOP_TTL, TimeUnit.MINUTES);
 
         //逻辑过期解决缓存击穿
-        Shop shop = queryWithLogicalExpire(id);
+/*        Shop shop = cacheClient
+                .queryWithLogicalExpire(CACHE_SHOP_KEY, id, Shop.class, this::getById, 20L, TimeUnit.SECONDS);*/
 
         if(shop == null) {
             return Result.fail("店铺不存在！");
@@ -54,9 +62,10 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         return Result.ok(shop);
     }
 
-    private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(10);
+//    private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(10);
 
     // * 逻辑过期解决缓存击穿
+/*
     public Shop queryWithLogicalExpire(Long id) {
         String key = CACHE_SHOP_KEY + id;
         // 1.从redis查询商铺缓存
@@ -99,9 +108,10 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         // 6.4 返回过期的商铺信息
         return shop;
     }
+*/
 
     // * 互斥锁解决缓存击穿
-    public Shop queryWithMutex(Long id) {
+/*    public Shop queryWithMutex(Long id) {
         String key = CACHE_SHOP_KEY + id;
         // 1.从redis查询商铺缓存
         String shopJson = stringRedisTemplate.opsForValue().get(key);
@@ -146,9 +156,10 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         }
         // 8.返回
         return shop;
-    }
+    }*/
 
     // * 缓存穿透 缓存空对象
+/*
     public Shop queryWithPassThrough(Long id) {
         String key = CACHE_SHOP_KEY + id;
         // 1.从redis查询商铺缓存
@@ -175,19 +186,20 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         // 7.返回
         return shop;
     }
+*/
 
     // * 互斥锁
-    private boolean tryLock(String key) {
+/*    private boolean tryLock(String key) {
         Boolean flag = stringRedisTemplate.opsForValue().setIfAbsent(key, "1",10,TimeUnit.SECONDS);
         // 避免返回值为空，使用了BooleanUtil工具类
         return BooleanUtil.isTrue(flag);
     }
     private void unlock(String key) {
         stringRedisTemplate.delete(key);
-    }
+    }*/
 
-    //  * 添加逻辑过去时间
-    public void saveShop2Redis(Long id, Long expireSeconds) throws InterruptedException {
+    //  * 添加逻辑过期时间
+/*    public void saveShop2Redis(Long id, Long expireSeconds) throws InterruptedException {
         // 1.查询店铺数据
         Shop shop = getById(id);
         Thread.sleep(200);
@@ -197,7 +209,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         redisData.setExpireTime(LocalDateTime.now().plusSeconds(expireSeconds));
         // 3.写入Redis
         stringRedisTemplate.opsForValue().set(CACHE_SHOP_KEY + id, JSONUtil.toJsonStr(redisData));
-    }
+    }*/
 
     // * 缓存更新 操作数据库后删除缓存
     @Override
