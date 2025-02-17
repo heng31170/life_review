@@ -274,7 +274,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     public void createVoucherOrder(VoucherOrder voucherOrder) {
         // * 一人一单逻辑
         Long userId = voucherOrder.getUserId();
-        int count = query().eq("voucher_id", voucherOrder).eq("user_id", userId).count();
+        Long count = query().eq("voucher_id", voucherOrder).eq("user_id", userId).count();
         if (count > 0) {
             log.error("你已经抢过优惠券了哦");
             return;
