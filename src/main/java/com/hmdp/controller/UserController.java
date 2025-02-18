@@ -36,6 +36,17 @@ public class  UserController {
     private IUserInfoService userInfoService;
 
 
+    // 用户签到
+    @PostMapping("/sign")
+    public Result sign() {
+        return userService.sign();
+    }
+    // 连续签到统计
+    @GetMapping("/sign/count")
+    public Result signCount() {
+        return userService.signCount();
+    }
+
     // UserController 根据id查询用户
     @GetMapping("/{id}")
     public Result queryUserById(@PathVariable("id") Long userId){
