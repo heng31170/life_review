@@ -24,6 +24,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -58,13 +59,23 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         SECKILL_SCRIPT.setResultType(Long.class);
     }
 
+    private static final String STREAM_NAME = "stream.orders";
+    private static final String GROUP_NAME = "g1";
+    private void createStreamGroup() {
+        Boolean exists = stringRedisTemplate.hasKey(STREAM_NAME);
+        if(exists == false || exists == null) {
+            stringRedisTemplate.opsForStream().createGroup(STREAM_NAME, GROUP_NAME);
+        }
+    }
+
     private static final ExecutorService SECKILL_ORDER_EXECUTOR = Executors.newSingleThreadExecutor();
     @PostConstruct
     private void init() {
-        SECKILL_ORDER_EXECUTOR.submit(new VoucherOrderHandler());
+        createStreamGroup();  // 创建stream和消费者组
+        SECKILL_ORDER_EXECUTOR.submit(new VoucherOrderHandler());  // 启动订单处理线程
     }
     private class VoucherOrderHandler implements Runnable {
-        String queueName = "stream.orders";
+        String queueName = STREAM_NAME;
         @Override
         public void run() {
             while (true) {

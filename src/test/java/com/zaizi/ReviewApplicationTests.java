@@ -39,7 +39,7 @@ import static com.zaizi.utils.RedisConstants.*;
 
 @Slf4j
 @SpringBootTest
-class HmDianPingApplicationTests {
+class ReviewApplicationTests {
 
     @Resource
     private CacheClient cacheClient;
