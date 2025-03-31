@@ -119,7 +119,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         String idsStr = StrUtil.join(",",ids);
         // select * from tb_user where id in (ids[0],ids[1]...) order by field(id,ids[0],ids[1]...)
         List<UserDTO> userDTOS = userService.query().in("id",ids)
-                .last("order by field(id," + idsStr + ")")
+                .last("order by field(id," + idsStr + ")") // 按照id的顺序排序
                 .list().stream()
                 .map(user -> BeanUtil.copyProperties(user,UserDTO.class))
                 .collect(Collectors.toList());

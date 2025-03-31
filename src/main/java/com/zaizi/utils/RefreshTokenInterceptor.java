@@ -34,7 +34,7 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
             return true;
         }
         // 5.将查询到的Hash数据转化为UserDTO对象
-        UserDTO userDTO = BeanUtil.fillBeanWithMap(userMap,new UserDTO(),false);
+        UserDTO userDTO = BeanUtil.fillBeanWithMap(userMap,new UserDTO(),false);  // false 不忽略null值
         // 6.存在，保存用户信息到ThreadLocal
         UserHolder.saveUser(userDTO);
         // 7.刷新token有效期

@@ -173,7 +173,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
             Shop shop = JSONUtil.toBean(shopJson,Shop.class);
             return shop;
         }
-        // 若查到的是空字符串，则是我们缓存的空数据
+        // 若查到的是空字符串，则是我们缓存的空数据  即 shopJson == ""
         if(shopJson != null) {
             return null;
         }

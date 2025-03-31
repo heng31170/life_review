@@ -92,7 +92,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 7.2 将User对象转为Hash存储
         UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);  // 屏蔽用户敏感信息
 //        Map<String,Object> userMap = BeanUtil.beanToMap(userDTO);  Long 转 String 的问题?
-        Map<String,Object> userMap = BeanUtil.beanToMap(userDTO, new HashMap<>(),
+        Map<String,Object> userMap = BeanUtil.beanToMap(userDTO, new HashMap<>(),  // userDto转为HashMap，如 {name=alice,age=30}
                 CopyOptions.create()
                         .setIgnoreNullValue(true)
                         .setFieldValueEditor((fieldName,fieldValue) -> fieldValue.toString()));
