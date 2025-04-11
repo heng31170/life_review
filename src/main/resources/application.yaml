@@ -20,6 +20,12 @@ spring:
         time-between-eviction-runs: 10s
   jackson:
     default-property-inclusion: non_null # JSON处理时忽略非空字段
+  rabbitmq:
+    host: 192.168.50.135 # 你的虚拟机IP
+    port: 5672 # 端口
+    virtual-host: /review # 虚拟主机
+    username: zaizi # 用户名
+    password: 123456 # 密码
 mybatis-plus:
   type-aliases-package: com.zaizi.entity # 别名扫描包
 logging:
